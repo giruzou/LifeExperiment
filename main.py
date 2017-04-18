@@ -33,6 +33,7 @@ class Rat(Animal):
 class Rat(Animal):
     def __init__(self):
         super().__init__()
+        self.limit = 2
     
 class Field():
     def __init__(self):
@@ -46,6 +47,9 @@ class Field():
         for animal in self.animals:
             animal.add_age()
 
+    def delete_dead(self):
+       self.animals = [animal for animal in self.animals if animal.age >= 0] 
+
     def print_age(self):
         for animal in self.animals:
             print(animal.get_age())
@@ -58,4 +62,7 @@ for i in range(100):
 
 for i in range(11):
     field.add_age()
-field.print_age()
+# field.print_age()
+print(len(field.animals))
+field.delete_dead()
+print(len(field.animals))
