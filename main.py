@@ -1,6 +1,6 @@
 from random import randrange
 
-class Animal():
+class Animal(object):
     def __init__(self):
         self.age = 0
 
@@ -22,12 +22,12 @@ class Animal():
 
 class Cat(Animal):
     def __init__(self):
-        super().__init__()
+        super(Cat, self).__init__()
         self.limit = 10
 
 class Rat(Animal):
     def __init__(self):
-        super().__init__()
+        super(Rat, self).__init__()
         self.limit = 10
 
 class Rat(Animal):
@@ -35,7 +35,7 @@ class Rat(Animal):
         super().__init__()
         self.limit = 2
     
-class Field():
+class Field(object):
     def __init__(self):
         self.animals = []
         self.size = 100
@@ -53,6 +53,12 @@ class Field():
     def print_age(self):
         for animal in self.animals:
             print(animal.get_age())
+    
+    def animals_sort(self):
+    	base = lambda animal: animal.x * self.size + animal.y
+    	self.animals = sorted(self.animals, key=base)
+    	for animal in self.animals:
+    		print base(animal)
 
 field = Field()
 for i in range(100):
@@ -60,9 +66,12 @@ for i in range(100):
     animal.set_pos(randrange(field.size), randrange(field.size))
     field.add(animal)
 
+field.animals_sort()
+'''
 for i in range(11):
-    field.add_age()
-# field.print_age()
+     field.add_age()
+field.print_age()
 print(len(field.animals))
 field.delete_dead()
 print(len(field.animals))
+'''
