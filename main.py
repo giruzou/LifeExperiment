@@ -47,9 +47,9 @@ class Field(object):
         self.rats = []
         self.cats = []
         
-        self.size = 100
+        self.size = 400
         pygame.init()
-        self.disp_size = (400, 300)
+        self.disp_size = (self.size, self.size)
         self.screen = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption("Experiment")
 
@@ -57,6 +57,7 @@ class Field(object):
     def add(self, ani):
         self.animals.append(ani)
     """
+
     def add_cat(self, ani):
         self.cats.append(ani)
     
@@ -103,6 +104,7 @@ while not done:
             done = True
     field.screen.fill((255, 255, 255))
     field.display()
+    pygame.display.flip()
 
 """
 for i in range(4):
