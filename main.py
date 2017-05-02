@@ -90,10 +90,10 @@ field = Field()
 
 for i in range(100):
     animal = Cat()
-    animal.set_pos(randrange(field.size), randrange(field.size))
+    animal.set_pos(randrange(field.size - Animal.r * 2) + Animal.r, randrange(field.size - Animal.r * 2) + Animal.r)
     field.add_cat(animal)
     animal = Rat()
-    animal.set_pos(randrange(field.size), randrange(field.size))
+    animal.set_pos(randrange(field.size - Animal.r * 2) + Animal.r, randrange(field.size - Animal.r * 2) + Animal.r)
     field.add_rat(animal)
 
 done = False
@@ -105,6 +105,7 @@ while not done:
     field.screen.fill((255, 255, 255))
     field.display()
     pygame.display.flip()
+pygame.quit()
 
 """
 for i in range(4):
