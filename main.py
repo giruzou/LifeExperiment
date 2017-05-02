@@ -7,6 +7,7 @@ class Animal(object):
     def __init__(self):
         Animal.r = 5
         self.age = 0
+        self.visible = 40 
 
     def set_pos(self, new_x, new_y):
         self.x = new_x
@@ -33,7 +34,12 @@ class Cat(Animal):
     def display(self, screen):
         pygame.draw.circle(screen, Cat.color, [self.x, self.y], Animal.r)
 
-    def move(self, width, height):
+    def find_near(self, lst):
+        return [animal for animal in lst if (self.x - animal.x)* (self.x - animal.x) + (self.y - animal.y) * (self.y - animal.y) < self.visible * self.visible ]
+
+    def move(self, width, height, lst):
+        a = self.find_near(lst)
+        print a
         self.x += randint(-3, 3)
         if self.x < Animal.r:
             self.x = Animal.r
@@ -54,7 +60,12 @@ class Rat(Animal):
     def display(self, screen):
         pygame.draw.circle(screen, Rat.color, [self.x, self.y], Animal.r)
 
-    def move(self, width, height):
+    def find_near(self, lst):
+        return [animal for animal in lst if (self.x - animal.x)* (self.x - animal.x) + (self.y - animal.y) * (self.y - animal.y) < self.visible * self.visible ]
+
+    def move(self, width, height, lst):
+        a = self.find_near(lst)
+        print a
         self.x += randint(-3, 3)
         if self.x < Animal.r:
             self.x = Animal.r
@@ -107,10 +118,10 @@ class Field(object):
     def display(self):
         for animal in self.cats:
             animal.display(self.screen)
-            animal.move(self.size, self.size)
+            animal.move(self.size, self.size, self.rats)
         for animal in self.rats:
             animal.display(self.screen)
-            animal.move(self.size, self.size)
+            animal.move(self.size, self.size, self.cats)
     
 
 field = Field()
@@ -125,6 +136,8 @@ for i in range(100):
 
 done = False
 clock = pygame.time.Clock()
+field.display()
+"""
 while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -134,6 +147,7 @@ while not done:
     pygame.display.flip()
 pygame.quit()
 
+"""
 """
 for i in range(4):
      field.add_age()
