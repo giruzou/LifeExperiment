@@ -1,4 +1,4 @@
-from random import randrange
+from random import randrange, randint
 import pygame
 from pygame.locals import *
 import sys
@@ -33,6 +33,18 @@ class Cat(Animal):
     def display(self, screen):
         pygame.draw.circle(screen, Cat.color, [self.x, self.y], Animal.r)
 
+    def move(self, width, height):
+        self.x += randint(-3, 3)
+        if self.x < Animal.r:
+            self.x = Animal.r
+        elif self.x > width - Animal.r:
+            self.x = width - Animal.r
+        self.y += randint(-3, 3)
+        if self.y < Animal.r:
+            self.y = Animal.r
+        elif self.y > height - Animal.r:
+            self.y = height - Animal.r
+
 class Rat(Animal):
     def __init__(self):
         super(Rat, self).__init__()
@@ -41,6 +53,18 @@ class Rat(Animal):
     
     def display(self, screen):
         pygame.draw.circle(screen, Rat.color, [self.x, self.y], Animal.r)
+
+    def move(self, width, height):
+        self.x += randint(-3, 3)
+        if self.x < Animal.r:
+            self.x = Animal.r
+        elif self.x > width - Animal.r:
+            self.x = width - Animal.r
+        self.y += randint(-3, 3)
+        if self.y < Animal.r:
+            self.y = Animal.r
+        elif self.y > height - Animal.r:
+            self.y = height - Animal.r
 
 class Field(object):
     def __init__(self):
@@ -79,18 +103,21 @@ class Field(object):
             print animal.get_age()
         for animal in self.rats:
             print animal.get_age()
+
     def display(self):
         for animal in self.cats:
             animal.display(self.screen)
+            animal.move(self.size, self.size)
         for animal in self.rats:
             animal.display(self.screen)
+            animal.move(self.size, self.size)
     
 
 field = Field()
 
 for i in range(100):
     animal = Cat()
-    animal.set_pos(randrange(field.size - Animal.r * 2) + Animal.r, randrange(field.size - Animal.r * 2) + Animal.r)
+    animal.set_pos(randrange(Animal.r, field.size - Animal.r * 2), randrange(Animal.r, field.size - Animal.r * 2))
     field.add_cat(animal)
     animal = Rat()
     animal.set_pos(randrange(field.size - Animal.r * 2) + Animal.r, randrange(field.size - Animal.r * 2) + Animal.r)
