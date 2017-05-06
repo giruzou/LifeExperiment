@@ -1,20 +1,19 @@
-from random import randrange, randint
 import pygame
 from pygame.locals import *
 import sys
+import numpy
 
 class Animal(object):
     def __init__(self):
         Animal.r = 5
         self.age = 0
-        self.visible = 40 
+        # self.visible = 40 
 
-    def set_pos(self, new_x, new_y):
-        self.x = new_x
-        self.y = new_y
+    def set_pos(self, new_pos):
+        self.pos = new_pos
 
     def get_pos(self):
-        return (self.x, self.y)
+        return self.pos
 
     def get_age(self):
         return self.age
@@ -24,32 +23,41 @@ class Animal(object):
             self.age += 1
         else:
             self.age = -2
+    
 
 class Cat(Animal):
     def __init__(self):
         super(Cat, self).__init__()
         self.limit = 10
         Cat.color = (255, 0, 0)
+        Cat.visible = 40
 
     def display(self, screen):
-        pygame.draw.circle(screen, Cat.color, [self.x, self.y], Animal.r)
+       pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
 
-    def find_near(self, lst):
-        return [animal for animal in lst if (self.x - animal.x)* (self.x - animal.x) + (self.y - animal.y) * (self.y - animal.y) < self.visible * self.visible ]
+    def decide_dir(self, lst):
+        res = numpy.zeros(2)
+        for animal in lst:
+            offset = self.pos - animal.pos
+            norm = numpy.linalg.norm(offset)
+            if norm < Cat.visible and norm != 0:
+                res += offset / norm
+        norm = numpy.linalg.norm(res)
+        if norm == 0:
+            return res
+        else:
+            return res / norm
 
-    def move(self, width, height, lst):
-        a = self.find_near(lst)
-        print a
-        self.x += randint(-3, 3)
-        if self.x < Animal.r:
-            self.x = Animal.r
-        elif self.x > width - Animal.r:
-            self.x = width - Animal.r
-        self.y += randint(-3, 3)
-        if self.y < Animal.r:
-            self.y = Animal.r
-        elif self.y > height - Animal.r:
-            self.y = height - Animal.r
+    def move(self, size, lst):
+        direct = self.decide_dir(lst)
+        if numpy.linalg.norm(direct) == 0:
+            # velocity = numpy.random.randint(-3, 4, 2, dtype=np.dtype("Float64"))
+            velocity = numpy.random.rand(2) * 7 - 4
+        else:
+            velocity = direct
+        self.pos += velocity
+        self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
+        # self.pos += numpy.random.randint(-3, 4, 2)
 
 class Rat(Animal):
     def __init__(self):
@@ -58,24 +66,30 @@ class Rat(Animal):
         Rat.color = (0, 255, 0)
     
     def display(self, screen):
-        pygame.draw.circle(screen, Rat.color, [self.x, self.y], Animal.r)
+        pygame.draw.circle(screen, Rat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
 
-    def find_near(self, lst):
-        return [animal for animal in lst if (self.x - animal.x)* (self.x - animal.x) + (self.y - animal.y) * (self.y - animal.y) < self.visible * self.visible ]
+    def decide_dir(self, lst):
+        res = numpy.zeros(2)
+        for animal in lst:
+            offset = self.pos - animal.pos
+            norm = numpy.linalg.norm(offset)
+            if norm < Cat.visible and norm != 0:
+                res += offset / norm
+        norm = numpy.linalg.norm(res) * -1
+        if norm == 0:
+            return res
+        else:
+            return res / norm
 
-    def move(self, width, height, lst):
-        a = self.find_near(lst)
-        print a
-        self.x += randint(-3, 3)
-        if self.x < Animal.r:
-            self.x = Animal.r
-        elif self.x > width - Animal.r:
-            self.x = width - Animal.r
-        self.y += randint(-3, 3)
-        if self.y < Animal.r:
-            self.y = Animal.r
-        elif self.y > height - Animal.r:
-            self.y = height - Animal.r
+    def move(self, size, lst):
+        direct = self.decide_dir(lst)
+        if numpy.linalg.norm(direct) == 0:
+            # velocity = numpy.random.randint(-3, 4, 2, dtype=np.dtype("Float64"))
+            velocity = numpy.random.rand(2) * 7 - 4
+        else:
+            velocity = direct
+        self.pos += velocity
+        self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
 
 class Field(object):
     def __init__(self):
@@ -87,11 +101,6 @@ class Field(object):
         self.disp_size = (self.size, self.size)
         self.screen = pygame.display.set_mode(self.disp_size)
         pygame.display.set_caption("Experiment")
-
-    """
-    def add(self, ani):
-        self.animals.append(ani)
-    """
 
     def add_cat(self, ani):
         self.cats.append(ani)
@@ -118,36 +127,35 @@ class Field(object):
     def display(self):
         for animal in self.cats:
             animal.display(self.screen)
-            animal.move(self.size, self.size, self.rats)
+            animal.move(self.size, self.rats)
         for animal in self.rats:
             animal.display(self.screen)
-            animal.move(self.size, self.size, self.cats)
+            animal.move(self.size, self.cats)
     
 
 field = Field()
 
 for i in range(100):
     animal = Cat()
-    animal.set_pos(randrange(Animal.r, field.size - Animal.r * 2), randrange(Animal.r, field.size - Animal.r * 2))
+    animal.set_pos(numpy.random.rand(2) * (field.size - Animal.r * 2) + Animal.r)
     field.add_cat(animal)
     animal = Rat()
-    animal.set_pos(randrange(field.size - Animal.r * 2) + Animal.r, randrange(field.size - Animal.r * 2) + Animal.r)
+    animal.set_pos(numpy.random.rand(2) * (field.size - Animal.r * 2) + Animal.r)
     field.add_rat(animal)
 
 done = False
 clock = pygame.time.Clock()
-field.display()
-"""
 while not done:
+    clock.tick(60)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
     field.screen.fill((255, 255, 255))
     field.display()
     pygame.display.flip()
+# field.display()
 pygame.quit()
 
-"""
 """
 for i in range(4):
      field.add_age()
