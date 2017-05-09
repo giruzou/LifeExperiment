@@ -30,7 +30,8 @@ class Cat(Animal):
         self.limit = 10
         Cat.color = (255, 0, 0)
         self.visible = 40
-        self.velocity = numpy.random.rand(2) * 7 - 4
+        self.speed = 3
+        self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
 
     def display(self, screen):
        pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
@@ -53,14 +54,22 @@ class Cat(Animal):
         if norm == 0:
             return res
         else:
-            return res / (norm * -1)
+            return res / (norm * -1) * self.speed
 
     def move(self, size, lst):
         direct = self.decide_dir(lst)
         if numpy.linalg.norm(direct) != 0:
             self.velocity = direct
         self.pos += self.velocity
-        self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
+
+        for i in range(self.pos.size):
+            if self.pos[i] > size - Animal.r:
+                self.pos[i] = size - Animal.r
+                self.velocity[i] *= -1
+            elif self.pos[i] < Animal.r:
+                self.pos[i] = Animal.r
+                self.velocity[i] *= -1
+        # self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
 
 class Rat(Animal):
     def __init__(self):
@@ -68,7 +77,8 @@ class Rat(Animal):
         self.limit = 2
         Rat.color = (0, 255, 0)
         self.visible = 60
-        self.velocity = numpy.random.rand(2) * 7 - 4
+        self.speed = 5
+        self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
     
     def display(self, screen):
         pygame.draw.circle(screen, Rat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
@@ -84,14 +94,21 @@ class Rat(Animal):
         if norm == 0:
             return res
         else:
-            return res / norm
+            return res / norm * self.speed
 
     def move(self, size, lst):
         direct = self.decide_dir(lst)
         if numpy.linalg.norm(direct) != 0:
             self.velocity = direct
         self.pos += self.velocity
-        self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
+
+        for i in range(self.pos.size):
+            if self.pos[i] > size - Animal.r:
+                self.pos[i] = size - Animal.r
+                self.velocity[i] *= -1
+            elif self.pos[i] < Animal.r:
+                self.pos[i] = Animal.r
+                self.velocity[i] *= -1
 
 class Field(object):
     def __init__(self):
@@ -137,10 +154,12 @@ class Field(object):
 
 field = Field()
 
-for i in range(100):
+for i in range(20):
     animal = Cat()
     animal.set_pos(numpy.random.rand(2) * (field.size - Animal.r * 2) + Animal.r)
     field.add_cat(animal)
+
+for i in range(100):
     animal = Rat()
     animal.set_pos(numpy.random.rand(2) * (field.size - Animal.r * 2) + Animal.r)
     field.add_rat(animal)
