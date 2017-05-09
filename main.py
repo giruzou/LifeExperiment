@@ -7,7 +7,6 @@ class Animal(object):
     def __init__(self):
         Animal.r = 5
         self.age = 0
-        # self.visible = 40 
 
     def set_pos(self, new_pos):
         self.pos = new_pos
@@ -22,7 +21,7 @@ class Animal(object):
         if self.limit > self.age:
             self.age += 1
         else:
-            self.age = -2
+            self.age = -10000
     
 
 class Cat(Animal):
@@ -30,40 +29,46 @@ class Cat(Animal):
         super(Cat, self).__init__()
         self.limit = 10
         Cat.color = (255, 0, 0)
-        Cat.visible = 40
+        self.visible = 40
+        self.velocity = numpy.random.rand(2) * 7 - 4
 
     def display(self, screen):
        pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
+    
+    def trying_catch(self, animal):
+        return None
 
     def decide_dir(self, lst):
         res = numpy.zeros(2)
         for animal in lst:
             offset = self.pos - animal.pos
             norm = numpy.linalg.norm(offset)
-            if norm < Cat.visible and norm != 0:
+            if norm == 0:
+                continue
+            if norm < self.r:
+                self.trying_catch(animal)
+            elif norm < self.visible:
                 res += offset / norm
         norm = numpy.linalg.norm(res)
         if norm == 0:
             return res
         else:
-            return res / norm
+            return res / (norm * -1)
 
     def move(self, size, lst):
         direct = self.decide_dir(lst)
-        if numpy.linalg.norm(direct) == 0:
-            # velocity = numpy.random.randint(-3, 4, 2, dtype=np.dtype("Float64"))
-            velocity = numpy.random.rand(2) * 7 - 4
-        else:
-            velocity = direct
-        self.pos += velocity
+        if numpy.linalg.norm(direct) != 0:
+            self.velocity = direct
+        self.pos += self.velocity
         self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
-        # self.pos += numpy.random.randint(-3, 4, 2)
 
 class Rat(Animal):
     def __init__(self):
         super(Rat, self).__init__()
         self.limit = 2
         Rat.color = (0, 255, 0)
+        self.visible = 60
+        self.velocity = numpy.random.rand(2) * 7 - 4
     
     def display(self, screen):
         pygame.draw.circle(screen, Rat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
@@ -73,9 +78,9 @@ class Rat(Animal):
         for animal in lst:
             offset = self.pos - animal.pos
             norm = numpy.linalg.norm(offset)
-            if norm < Cat.visible and norm != 0:
+            if norm < self.visible and norm != 0:
                 res += offset / norm
-        norm = numpy.linalg.norm(res) * -1
+        norm = numpy.linalg.norm(res)
         if norm == 0:
             return res
         else:
@@ -83,12 +88,9 @@ class Rat(Animal):
 
     def move(self, size, lst):
         direct = self.decide_dir(lst)
-        if numpy.linalg.norm(direct) == 0:
-            # velocity = numpy.random.randint(-3, 4, 2, dtype=np.dtype("Float64"))
-            velocity = numpy.random.rand(2) * 7 - 4
-        else:
-            velocity = direct
-        self.pos += velocity
+        if numpy.linalg.norm(direct) != 0:
+            self.velocity = direct
+        self.pos += self.velocity
         self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
 
 class Field(object):
@@ -153,7 +155,6 @@ while not done:
     field.screen.fill((255, 255, 255))
     field.display()
     pygame.display.flip()
-# field.display()
 pygame.quit()
 
 """
