@@ -53,12 +53,10 @@ class Cat(Animal):
         self.pos += self.velocity
 
         for i in range(self.pos.size):
-            if self.pos[i] > size - Animal.r:
-                self.pos[i] = size - Animal.r
-                self.velocity[i] *= -1
-            elif self.pos[i] < Animal.r:
-                self.pos[i] = Animal.r
-                self.velocity[i] *= -1
+            if self.pos[i] > size:
+                self.pos[i] -= size
+            elif self.pos[i] < 0:
+                self.pos[i] += size
         # self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
 
 class Rat(Animal):
@@ -93,12 +91,10 @@ class Rat(Animal):
         self.pos += self.velocity
 
         for i in range(self.pos.size):
-            if self.pos[i] > size - Animal.r:
-                self.pos[i] = size - Animal.r
-                self.velocity[i] *= -1
-            elif self.pos[i] < Animal.r:
-                self.pos[i] = Animal.r
-                self.velocity[i] *= -1
+            if self.pos[i] > size:
+                self.pos[i] -= size
+            elif self.pos[i] < 0:
+                self.pos[i] += size
 
 """
 class Field(object):
@@ -147,7 +143,7 @@ for i in range(10):
     cats.append(animal)
     # field.add_cat(animal)
 
-for i in range(1):
+for i in range(100):
     animal = Rat()
     animal.set_pos(numpy.random.rand(2) * (size - Animal.r * 2) + Animal.r)
     rats.append(animal)
@@ -164,37 +160,3 @@ while not done:
     display()
     pygame.display.flip()
 pygame.quit()
-
-
-
-# field = Field()
-
-"""
-for i in range(10):
-    animal = Cat()
-    animal.set_pos(numpy.random.rand(2) * (field.size - Animal.r * 2) + Animal.r)
-    field.add_cat(animal)
-
-for i in range(1):
-    animal = Rat()
-    animal.set_pos(numpy.random.rand(2) * (field.size - Animal.r * 2) + Animal.r)
-    field.add_rat(animal)
-
-done = False
-clock = pygame.time.Clock()
-while not done:
-    clock.tick(60)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-    field.screen.fill((255, 255, 255))
-    field.display()
-    pygame.display.flip()
-pygame.quit()
-
-"""
-"""
-print(len(field.rats))
-field.delete_dead()
-print(len(field.rats))
-"""
