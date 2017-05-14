@@ -50,6 +50,13 @@ class Cat(Animal):
         return None
 
     def decide_dir(self, lst):
+        lst = [ self.return_offset(animal) for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
+        if len(lst) == 0:
+            return numpy.zeros(2)
+        dist_param = lambda offset: numpy.linalg.norm(offset)
+        dist = min(lst, key=dist_param)
+        return dist / numpy.linalg.norm(dist) * self.speed
+        """
         res = numpy.zeros(2)
         for animal in lst:
             offset = self.return_offset(animal)
@@ -65,7 +72,7 @@ class Cat(Animal):
             return res
         else:
             return res / norm * self.speed
-
+        """
 
 class Rat(Animal):
     def __init__(self):
