@@ -13,39 +13,6 @@ class Animal(object):
     def get_pos(self):
         return self.pos
 
-
-class Cat(Animal):
-    def __init__(self):
-        super(Cat, self).__init__()
-        self.limit = 10
-        Cat.color = (255, 0, 0)
-        self.visible = 60
-        self.speed = 3
-        self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
-
-    def display(self, screen):
-       pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
-    
-    def trying_catch(self, animal):
-        return None
-
-    def decide_dir(self, lst):
-        res = numpy.zeros(2)
-        for animal in lst:
-            offset = self.pos - animal.pos
-            norm = numpy.linalg.norm(offset)
-            if norm == 0:
-                continue
-            if norm < self.r:
-                self.trying_catch(animal)
-            elif norm < self.visible:
-                res += offset / norm
-        norm = numpy.linalg.norm(res)
-        if norm == 0:
-            return res
-        else:
-            return res / (norm * -1) * self.speed
-
     def move(self, size, lst):
         direct = self.decide_dir(lst)
         if numpy.linalg.norm(direct) != 0:
@@ -57,7 +24,48 @@ class Cat(Animal):
                 self.pos[i] -= size
             elif self.pos[i] < 0:
                 self.pos[i] += size
-        # self.pos = numpy.clip(self.pos, Animal.r, size - Animal.r)
+    
+    # return real position
+    def return_offset(self, animal):
+         offset = numpy.empty([2])
+         for i in range(offset.size):
+             down = min(animal.pos[i], self.pos[i])
+             up = max(animal.pos[i], self.pos[i])
+             offset[i] = min(animal.pos[i] - self.pos[i], size + down - up, key=abs)
+         return offset
+
+class Cat(Animal):
+    def __init__(self):
+        super(Cat, self).__init__()
+        self.limit = 10
+        Cat.color = (255, 0, 0)
+        self.visible = 60
+        self.speed = 5
+        self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
+
+    def display(self, screen):
+       pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
+    
+    def trying_catch(self, animal):
+        return None
+
+    def decide_dir(self, lst):
+        res = numpy.zeros(2)
+        for animal in lst:
+            offset = self.return_offset(animal)
+            norm = numpy.linalg.norm(offset)
+            if norm == 0:
+                continue
+            if norm < self.r:
+                self.trying_catch(animal)
+            elif norm < self.visible:
+                res += offset / norm
+        norm = numpy.linalg.norm(res)
+        if norm == 0:
+            return res
+        else:
+            return res / norm * self.speed
+
 
 class Rat(Animal):
     def __init__(self):
@@ -74,7 +82,7 @@ class Rat(Animal):
     def decide_dir(self, lst):
         res = numpy.zeros(2)
         for animal in lst:
-            offset = self.pos - animal.pos
+            offset = self.return_offset(animal)
             norm = numpy.linalg.norm(offset)
             if norm < self.visible and norm != 0:
                 res += offset / norm
@@ -82,47 +90,9 @@ class Rat(Animal):
         if norm == 0:
             return res
         else:
-            return res / norm * self.speed
+            return res / (norm * -1) * self.speed
 
-    def move(self, size, lst):
-        direct = self.decide_dir(lst)
-        if numpy.linalg.norm(direct) != 0:
-            self.velocity = direct
-        self.pos += self.velocity
 
-        for i in range(self.pos.size):
-            if self.pos[i] > size:
-                self.pos[i] -= size
-            elif self.pos[i] < 0:
-                self.pos[i] += size
-
-"""
-class Field(object):
-    def __init__(self):
-        self.rats = []
-        self.cats = []
-        
-        self.size = 400
-        pygame.init()
-        self.disp_size = (self.size, self.size)
-        self.screen = pygame.display.set_mode(self.disp_size)
-        pygame.display.set_caption("Experiment")
-
-    def add_cat(self, ani):
-        self.cats.append(ani)
-    
-    def add_rat(self, ani):
-        self.rats.append(ani)
-
-    def display(self):
-        for animal in self.cats:
-            animal.display(self.screen)
-            animal.move(self.size, self.rats)
-        for animal in self.rats:
-            animal.display(self.screen)
-            animal.move(self.size, self.cats)
-    
-"""
 
 def display():
     for animal in cats:
@@ -137,17 +107,15 @@ screen = pygame.display.set_mode((size, size))
 cats = []
 rats = []
 
-for i in range(10):
+for i in range(1):
     animal = Cat()
     animal.set_pos(numpy.random.rand(2) * (size - Animal.r * 2) + Animal.r)
     cats.append(animal)
-    # field.add_cat(animal)
 
-for i in range(100):
+for i in range(10):
     animal = Rat()
     animal.set_pos(numpy.random.rand(2) * (size - Animal.r * 2) + Animal.r)
     rats.append(animal)
-    # field.add_rat(animal)
 
 done = False
 clock = pygame.time.Clock()
