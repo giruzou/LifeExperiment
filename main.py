@@ -42,37 +42,34 @@ class Cat(Animal):
         self.visible = 60
         self.speed = 5
         self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
+        self.target = None
+        self.dead = False
 
     def display(self, screen):
        pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
     
-    def trying_catch(self, animal):
-        return None
+    def trying_catch(self):
+        global done
+        done = False
+        self.target.dead = True
 
     def decide_dir(self, lst):
-        lst = [ self.return_offset(animal) for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
+        global rats
+        if self.target != None:
+            offset = self.return_offset(self.target)
+            if numpy.linalg.norm(offset) < self.visible:
+                return offset / numpy.linalg.norm(offset) * self.speed
+            else:
+                self.target.marked = False
+                self.target = None
+        lst = [ animal for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
         if len(lst) == 0:
             return numpy.zeros(2)
-        dist_param = lambda offset: numpy.linalg.norm(offset)
-        dist = min(lst, key=dist_param)
-        return dist / numpy.linalg.norm(dist) * self.speed
-        """
-        res = numpy.zeros(2)
-        for animal in lst:
-            offset = self.return_offset(animal)
-            norm = numpy.linalg.norm(offset)
-            if norm == 0:
-                continue
-            if norm < self.r:
-                self.trying_catch(animal)
-            elif norm < self.visible:
-                res += offset / norm
-        norm = numpy.linalg.norm(res)
-        if norm == 0:
-            return res
-        else:
-            return res / norm * self.speed
-        """
+        dist_param = lambda animal: numpy.linalg.norm(self.return_offset(animal))
+        self.target = min(lst, key=dist_param)
+        self.target.marked = True
+        offset = self.return_offset(self.target)
+        return offset / numpy.linalg.norm(offset) * self.speed
 
 class Rat(Animal):
     def __init__(self):
@@ -80,11 +77,16 @@ class Rat(Animal):
         self.limit = 2
         Rat.color = (0, 255, 0)
         self.visible = 60
-        self.speed = 5
+        self.speed = 4
         self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
+        self.marked = False
+        self.dead = False
     
     def display(self, screen):
-        pygame.draw.circle(screen, Rat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
+        if self.marked:
+            pygame.draw.circle(screen, (0, 0, 255), [int(self.pos[0]), int(self.pos[1])], Animal.r)
+        else:
+            pygame.draw.circle(screen, Rat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
 
     def decide_dir(self, lst):
         res = numpy.zeros(2)
@@ -108,6 +110,11 @@ def display():
     for animal in rats:
         animal.display(screen)
         animal.move(size, cats)
+
+def delete_dead():
+    global cats, rats
+    cats = [ cat for cat in cats if not cat.dead]
+    rats = [ rat for rat in rats if not rat.dead]
 
 size = 500
 screen = pygame.display.set_mode((size, size))
@@ -133,5 +140,7 @@ while not done:
             done = True
     screen.fill((255, 255, 255))
     display()
+    delete_dead()
     pygame.display.flip()
+print(len(rats))
 pygame.quit()
