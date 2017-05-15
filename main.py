@@ -49,7 +49,6 @@ class Cat(Animal):
        pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
     
     def trying_catch(self):
-        print "catch"
         global done
         done = False
         self.target.dead = True
@@ -60,7 +59,7 @@ class Cat(Animal):
             offset = self.return_offset(self.target)
             if numpy.linalg.norm(offset) < self.r:
                 self.trying_catch()
-                dire = numpy.random.rand(2)
+                dire = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
                 return dire / numpy.linalg.norm(dire) * self.speed
             elif numpy.linalg.norm(offset) < self.visible:
                 return offset / numpy.linalg.norm(offset) * self.speed
@@ -147,5 +146,4 @@ while not done:
     display()
     delete_dead()
     pygame.display.flip()
-print(len(rats))
 pygame.quit()
