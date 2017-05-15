@@ -49,15 +49,20 @@ class Cat(Animal):
        pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
     
     def trying_catch(self):
+        print "catch"
         global done
         done = False
         self.target.dead = True
+        self.target = None
 
     def decide_dir(self, lst):
-        global rats
         if self.target != None:
             offset = self.return_offset(self.target)
-            if numpy.linalg.norm(offset) < self.visible:
+            if numpy.linalg.norm(offset) < self.r:
+                self.trying_catch()
+                dire = numpy.random.rand(2)
+                return dire / numpy.linalg.norm(dire) * self.speed
+            elif numpy.linalg.norm(offset) < self.visible:
                 return offset / numpy.linalg.norm(offset) * self.speed
             else:
                 self.target.marked = False
