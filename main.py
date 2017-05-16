@@ -50,6 +50,12 @@ class Cat(Animal):
     def display(self, screen):
        pygame.draw.circle(screen, Cat.color, [int(self.pos[0]), int(self.pos[1])], Animal.r)
     
+    def target_exists(self):
+        if self.target != None:
+            targets = [ rat for rat in rats if self.target == rat]
+            if(len(targets) == 0):
+                self.target = None
+    
     def trying_catch(self):
         global done
         done = False
@@ -57,6 +63,7 @@ class Cat(Animal):
         self.target = None
 
     def decide_dir(self, lst):
+        self.target_exists()
         if self.target != None:
             self.speed = self.max_speed
             offset = self.return_offset(self.target)
@@ -69,6 +76,8 @@ class Cat(Animal):
             else:
                 self.target = None
         self.speed = self.walk_speed
+        if len(lst) == 0:
+            return self.velocity / numpy.linalg.norm(self.velocity) * self.speed
         lst = [ animal for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
         if len(lst) == 0:
             return numpy.zeros(2)
@@ -116,19 +125,25 @@ def display():
 def delete_dead():
     global cats, rats
     cats = [ cat for cat in cats if not cat.dead]
-    rats = [ rat for rat in rats if not rat.dead]
+    rats = [ rat for rat in rats if not rat.dead ]
+    """
+    for cat in cats:
+        if cat.target != None and not any([ True for rat in rats if rat == cat.target ]):
+            print cat 
+            cat.target = None
+    """
 
 size = 500
 screen = pygame.display.set_mode((size, size))
 cats = []
 rats = []
 
-for i in range(1):
+for i in range(10):
     animal = Cat()
     animal.set_pos(numpy.random.rand(2) * (size - Animal.r * 2) + Animal.r)
     cats.append(animal)
 
-for i in range(10):
+for i in range(100):
     animal = Rat()
     animal.set_pos(numpy.random.rand(2) * (size - Animal.r * 2) + Animal.r)
     rats.append(animal)
@@ -144,4 +159,5 @@ while not done:
     display()
     delete_dead()
     pygame.display.flip()
+
 pygame.quit()
