@@ -57,6 +57,10 @@ class Cat(Animal):
             targets = [ rat for rat in rats if self.target == rat]
             if(len(targets) == 0):
                 self.target = None
+                return False
+            else:
+                return True
+        return False
     
     def trying_catch(self):
         global done
@@ -65,8 +69,7 @@ class Cat(Animal):
         self.target = None
 
     def decide_dir(self, lst):
-        self.target_exists()
-        if self.target != None:
+        if self.target_exists():
             self.speed = self.max_speed
             offset = self.return_offset(self.target)
             if numpy.linalg.norm(offset) < self.r:
@@ -78,13 +81,15 @@ class Cat(Animal):
             else:
                 self.target = None
         self.speed = self.walk_speed
+        """
         if len(lst) == 0:
             return self.velocity / numpy.linalg.norm(self.velocity) * self.speed
+        """
         lst = [ animal for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
         if len(lst) == 0:
             # return numpy.zeros(2)
             arg = math.atan(self.velocity[1] / self.velocity[0])
-            maxarg = math.pi / 7
+            maxarg = math.pi / 10
             arg += random.random() * (maxarg * 2) - maxarg
             if self.velocity[0] < 0:
                 arg += math.pi
