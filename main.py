@@ -67,6 +67,10 @@ class Cat(Animal):
         done = False
         self.target.dead = True
         self.target = None
+    
+    def speed_optimize(self, vec):
+        return vec / numpy.linalg.norm(vec) * self.speed
+
 
     def decide_dir(self, lst):
         if self.target_exists():
@@ -75,9 +79,9 @@ class Cat(Animal):
             if numpy.linalg.norm(offset) < self.r:
                 self.trying_catch()
                 dire = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
-                return dire / numpy.linalg.norm(dire) * self.speed
+                return self.speed_optimize(dire)
             elif numpy.linalg.norm(offset) < self.visible:
-                return offset / numpy.linalg.norm(offset) * self.speed
+                return self.speed_optimize(offset)
             else:
                 self.target = None
         self.speed = self.walk_speed
@@ -99,7 +103,7 @@ class Cat(Animal):
         dist_param = lambda animal: numpy.linalg.norm(self.return_offset(animal))
         self.target = min(lst, key=dist_param)
         offset = self.return_offset(self.target)
-        return offset / numpy.linalg.norm(offset) * self.speed
+        return self.speed_optimize(offset)
 
 class Rat(Animal):
     def __init__(self):
