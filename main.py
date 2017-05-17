@@ -71,39 +71,43 @@ class Cat(Animal):
     def speed_optimize(self, vec):
         return vec / numpy.linalg.norm(vec) * self.speed
 
+    def find(self, animal):
+        if numpy.linalg.norm(self.return_offset(animal)) > self.visible:
+            return False
+        return True
+    def chase_target(self):
+        self.speed = self.max_speed
+        offset = self.return_offset(self.target)
+        if numpy.linalg.norm(offset) < self.r:
+            self.trying_catch()
+        elif numpy.linalg.norm(offset) < self.visible:
+            return self.speed_optimize(offset)
+        else:
+            self.target = None
+        self.speed = self.walk_speed
+        dire = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
+        return self.speed_optimize(dire)
 
     def decide_dir(self, lst):
         if self.target_exists():
-            self.speed = self.max_speed
-            offset = self.return_offset(self.target)
-            if numpy.linalg.norm(offset) < self.r:
-                self.trying_catch()
-                dire = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
-                return self.speed_optimize(dire)
-            elif numpy.linalg.norm(offset) < self.visible:
-                return self.speed_optimize(offset)
-            else:
-                self.target = None
-        self.speed = self.walk_speed
-        """
-        if len(lst) == 0:
-            return self.velocity / numpy.linalg.norm(self.velocity) * self.speed
-        """
-        lst = [ animal for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
-        if len(lst) == 0:
-            # return numpy.zeros(2)
-            arg = math.atan(self.velocity[1] / self.velocity[0])
-            maxarg = math.pi / 10
-            arg += random.random() * (maxarg * 2) - maxarg
-            if self.velocity[0] < 0:
-                arg += math.pi
-            dire = numpy.array([math.cos(arg), math.sin(arg)]) * self.speed
+            return self.chase_target()
+        else:
+            self.speed = self.walk_speed
 
-            return dire
-        dist_param = lambda animal: numpy.linalg.norm(self.return_offset(animal))
-        self.target = min(lst, key=dist_param)
-        offset = self.return_offset(self.target)
-        return self.speed_optimize(offset)
+            lst = [ animal for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
+            if len(lst) == 0:
+                arg = math.atan(self.velocity[1] / self.velocity[0])
+                maxarg = math.pi / 10
+                arg += random.random() * (maxarg * 2) - maxarg
+                if self.velocity[0] < 0:
+                    arg += math.pi
+                dire = numpy.array([math.cos(arg), math.sin(arg)]) * self.speed
+                return dire
+
+            dist_param = lambda animal: numpy.linalg.norm(self.return_offset(animal))
+            self.target = min(lst, key=dist_param)
+            offset = self.return_offset(self.target)
+            return self.speed_optimize(offset)
 
 class Rat(Animal):
     def __init__(self):
