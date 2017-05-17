@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 import sys
 import numpy
+import math
+import random
 
 class Animal(object):
     def __init__(self):
@@ -80,7 +82,15 @@ class Cat(Animal):
             return self.velocity / numpy.linalg.norm(self.velocity) * self.speed
         lst = [ animal for animal in lst if numpy.linalg.norm(self.return_offset(animal)) < self.visible ]
         if len(lst) == 0:
-            return numpy.zeros(2)
+            # return numpy.zeros(2)
+            arg = math.atan(self.velocity[1] / self.velocity[0])
+            maxarg = math.pi / 7
+            arg += random.random() * (maxarg * 2) - maxarg
+            if self.velocity[0] < 0:
+                arg += math.pi
+            dire = numpy.array([math.cos(arg), math.sin(arg)]) * self.speed
+
+            return dire
         dist_param = lambda animal: numpy.linalg.norm(self.return_offset(animal))
         self.target = min(lst, key=dist_param)
         offset = self.return_offset(self.target)
@@ -124,14 +134,8 @@ def display():
 
 def delete_dead():
     global cats, rats
-    cats = [ cat for cat in cats if not cat.dead]
+    cats = [ cat for cat in cats if not cat.dead ]
     rats = [ rat for rat in rats if not rat.dead ]
-    """
-    for cat in cats:
-        if cat.target != None and not any([ True for rat in rats if rat == cat.target ]):
-            print cat 
-            cat.target = None
-    """
 
 size = 500
 screen = pygame.display.set_mode((size, size))
