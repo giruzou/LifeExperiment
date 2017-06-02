@@ -46,6 +46,7 @@ class Cat(Animal):
         self.walk_speed = 2
         self.max_speed = 5
         self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
+        self.power = 5
         self.target = None
         self.dead = False
 
@@ -81,12 +82,19 @@ class Cat(Animal):
         if numpy.linalg.norm(offset) < self.r:
             self.trying_catch()
         elif numpy.linalg.norm(offset) < self.visible:
-            return self.speed_optimize(offset)
+            # return self.speed_optimize(offset)
+            acc = offset + self.target.speed
+            acc = acc / numpy.linalg.norm(acc) * self.power
+            return self.speed_optimize(self.speed + acc)
+
         else:
             self.target = None
+        """
         self.speed = self.walk_speed
         dire = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
         return self.speed_optimize(dire)
+        """
+        return self.speed_optimize(self.velocity)
 
     def decide_dir(self, lst):
         if self.target_exists():
@@ -114,8 +122,8 @@ class Rat(Animal):
         super(Rat, self).__init__()
         self.limit = 2
         Rat.color = (0, 255, 0)
-        self.visible = 60
-        self.speed = 4
+        self.visible = 10
+        self.speed = 3
         self.velocity = numpy.random.rand(2) * (self.speed * 2 + 1) - self.speed - 1
         self.dead = False
     
@@ -155,7 +163,7 @@ screen = pygame.display.set_mode((size, size))
 cats = []
 rats = []
 
-for i in range(10):
+for i in range(100):
     animal = Cat()
     animal.set_pos(numpy.random.rand(2) * (size - Animal.r * 2) + Animal.r)
     cats.append(animal)
